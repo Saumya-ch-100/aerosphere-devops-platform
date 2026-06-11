@@ -1,0 +1,2 @@
+cluster.name: "aerosphere-logs"
+network.host: 0.0.0.0
