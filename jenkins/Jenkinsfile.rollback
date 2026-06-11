@@ -1,0 +1,44 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION = "us-east-1"
+        SERVICE_NAME = "${params.SERVICE_NAME}"
+        ENVIRONMENT = "${params.ENVIRONMENT}"
+        NAMESPACE = "aerosphere-${ENVIRONMENT}"
+        HELM_RELEASE_NAME = "${SERVICE_NAME}"
+    }
+
+    parameters {
+        choice(name: 'SERVICE_NAME', choices: ['flight-ops', 'telemetry', 'maintenance', 'weather-intel', 'baggage-ops', 'passenger-ops'], description: 'Microservice to rollback')
+        choice(name: 'ENVIRONMENT', choices: ['staging', 'prod'], description: 'Target environment')
+    }
+
+    stages {
+        stage('Update Kubeconfig') {
+            steps {
+                sh "aws eks update-kubeconfig --region ${AWS_REGION} --name aerosphere-eks-${ENVIRONMENT}"
+            }
+        }
+
+        stage('Rollback via Helm') {
+            steps {
+                echo "Rolling back ${SERVICE_NAME} in ${ENVIRONMENT} to previous stable revision..."
+                sh "helm rollback ${HELM_RELEASE_NAME} 0 --namespace ${NAMESPACE} --wait --timeout 300s"
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo "Rollback successful. System restored."
+            // Notify PagerDuty/Slack
+        }
+        failure {
+            echo "CRITICAL: Rollback failed. Manual intervention required."
+        }
+    }
+}
