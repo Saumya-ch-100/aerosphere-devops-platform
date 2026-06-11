@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroSphere Command | Global Aviation Operations</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-plane-departure"></i>
+                <h2>AeroSphere</h2>
+            </div>
+            <nav>
+                <a href="#" class="nav-item active"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="#" class="nav-item"><i class="fa-solid fa-server"></i> Infrastructure</a>
+                <a href="#" class="nav-item"><i class="fa-solid fa-plane"></i> Flight Ops</a>
+                <a href="#" class="nav-item"><i class="fa-solid fa-shield-halved"></i> Security & DR</a>
+                <a href="#" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+            </nav>
+            <div class="system-status">
+                <div class="status-indicator online"></div>
+                <span>All Systems Nominal</span>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="search-bar">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Search flights, nodes, alerts...">
+                </div>
+                <div class="user-profile">
+                    <div class="notification-bell">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <img src="https://ui-avatars.com/api/?name=Commander&background=0D8ABC&color=fff" alt="User Avatar" class="avatar">
+                </div>
+            </header>
+
+            <div class="dashboard-header">
+                <h1>Global Operations Overview</h1>
+                <p>Real-time telemetry and infrastructure monitoring</p>
+            </div>
+
+            <!-- KPI Cards -->
+            <section class="kpi-grid">
+                <div class="kpi-card glass">
+                    <div class="kpi-icon blue"><i class="fa-solid fa-plane-up"></i></div>
+                    <div class="kpi-data">
+                        <h3>Active Flights</h3>
+                        <p class="value" id="active-flights">12,483</p>
+                        <span class="trend positive"><i class="fa-solid fa-arrow-up"></i> 4.2%</span>
+                    </div>
+                </div>
+                <div class="kpi-card glass">
+                    <div class="kpi-icon green"><i class="fa-solid fa-network-wired"></i></div>
+                    <div class="kpi-data">
+                        <h3>K8s Nodes</h3>
+                        <p class="value" id="k8s-nodes">142 / 150</p>
+                        <span class="trend online">Healthy</span>
+                    </div>
+                </div>
+                <div class="kpi-card glass">
+                    <div class="kpi-icon purple"><i class="fa-solid fa-cloud-bolt"></i></div>
+                    <div class="kpi-data">
+                        <h3>API Requests/sec</h3>
+                        <p class="value" id="api-reqs">4,291</p>
+                        <span class="trend neutral">Steady</span>
+                    </div>
+                </div>
+                <div class="kpi-card glass">
+                    <div class="kpi-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="kpi-data">
+                        <h3>Active Alerts</h3>
+                        <p class="value" id="active-alerts">3</p>
+                        <span class="trend negative">Action Req.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts & Maps Section -->
+            <section class="visuals-grid">
+                <div class="chart-container glass main-chart">
+                    <div class="card-header">
+                        <h3>Platform Traffic & Telemetry</h3>
+                        <select class="chart-filter"><option>Last 24 Hours</option><option>Last 7 Days</option></select>
+                    </div>
+                    <canvas id="trafficChart"></canvas>
+                </div>
+
+                <div class="services-container glass">
+                    <div class="card-header">
+                        <h3>Microservices Health</h3>
+                    </div>
+                    <ul class="service-list">
+                        <li class="service-item">
+                            <span class="service-name">flight-ops-service</span>
+                            <div class="service-status">
+                                <span class="badge-success">Running</span>
+                            </div>
+                        </li>
+                        <li class="service-item">
+                            <span class="service-name">telemetry-ingest</span>
+                            <div class="service-status">
+                                <span class="badge-success">Running</span>
+                            </div>
+                        </li>
+                        <li class="service-item">
+                            <span class="service-name">maintenance-ai</span>
+                            <div class="service-status">
+                                <span class="badge-warning">Scaling</span>
+                            </div>
+                        </li>
+                        <li class="service-item">
+                            <span class="service-name">weather-intel</span>
+                            <div class="service-status">
+                                <span class="badge-success">Running</span>
+                            </div>
+                        </li>
+                        <li class="service-item">
+                            <span class="service-name">passenger-gateway</span>
+                            <div class="service-status">
+                                <span class="badge-success">Running</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Infrastructure Bottom Section -->
+            <section class="infra-grid">
+                <div class="table-container glass">
+                    <div class="card-header">
+                        <h3>Recent Deployments (Jenkins)</h3>
+                        <button class="btn-small">View All</button>
+                    </div>
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Version</th>
+                                <th>Environment</th>
+                                <th>Status</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>flight-ops</td>
+                                <td>v2.4.1</td>
+                                <td>Production</td>
+                                <td><span class="status-dot success"></span> Success</td>
+                                <td>10 min ago</td>
+                            </tr>
+                            <tr>
+                                <td>weather-intel</td>
+                                <td>v1.9.0</td>
+                                <td>Staging</td>
+                                <td><span class="status-dot success"></span> Success</td>
+                                <td>1 hr ago</td>
+                            </tr>
+                            <tr>
+                                <td>maintenance-ai</td>
+                                <td>v3.0.2</td>
+                                <td>Production</td>
+                                <td><span class="status-dot error"></span> Failed</td>
+                                <td>3 hrs ago</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="log-container glass">
+                    <div class="card-header">
+                        <h3>Live Log Stream (ELK)</h3>
+                    </div>
+                    <div class="terminal" id="log-stream">
+                        <div class="log-line"><span class="timestamp">[14:32:01]</span> <span class="info">INFO</span> [telemetry] Ingested 5420 data points from region EU-WEST</div>
+                        <div class="log-line"><span class="timestamp">[14:32:05]</span> <span class="info">INFO</span> [flight-ops] Flight BA293 departed LHR.</div>
+                        <div class="log-line"><span class="timestamp">[14:32:10]</span> <span class="warn">WARN</span> [k8s-autoscaler] High CPU on maintenance-ai pods, triggering scale up.</div>
+                        <div class="log-line"><span class="timestamp">[14:32:15]</span> <span class="error">ERROR</span> [vault] Connection timeout fetching secrets for baggage-ops.</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="js/app.js"></script>
+</body>
+</html>
