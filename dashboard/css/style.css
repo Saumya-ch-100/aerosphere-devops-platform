@@ -222,6 +222,11 @@ nav {
     padding: 1.5rem;
 }
 
+.chart-container {
+    height: 350px;
+    position: relative;
+}
+
 .card-header {
     display: flex;
     justify-content: space-between;
@@ -405,3 +410,18 @@ nav {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* Leaflet Map Customizations */
+.custom-plane-icon {
+    background: transparent !important;
+    border: none !important;
+}
+.leaflet-container {
+    background: var(--bg-dark) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+.leaflet-bar a {
+    background-color: var(--panel-bg) !important;
+    color: var(--text-main) !important;
+    border-color: var(--panel-border) !important;
+}

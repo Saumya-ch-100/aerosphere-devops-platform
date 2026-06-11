@@ -1,4 +1,47 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Leaflet Map
+    const map = L.map('aviationMap', {
+        zoomControl: false
+    }).setView([30, 0], 2);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
+    }).addTo(map);
+
+    // Custom airplane icon using HTML and FontAwesome
+    const planeIcon = L.divIcon({
+        html: '<i class="fa-solid fa-plane" style="color: #3b82f6; font-size: 16px; transform: rotate(45deg);"></i>',
+        className: 'custom-plane-icon',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+    });
+
+    const planes = [
+        { marker: L.marker([40.7128, -74.0060], {icon: planeIcon}).addTo(map), lat: 40.7128, lng: -74.0060, dLat: 0.05, dLng: 0.1 }, // NY to Europe
+        { marker: L.marker([51.5074, -0.1278], {icon: planeIcon}).addTo(map), lat: 51.5074, lng: -0.1278, dLat: -0.05, dLng: -0.05 }, // London to SA
+        { marker: L.marker([35.6762, 139.6503], {icon: planeIcon}).addTo(map), lat: 35.6762, lng: 139.6503, dLat: -0.02, dLng: -0.1 }, // Tokyo to US
+        { marker: L.marker([-33.8688, 151.2093], {icon: planeIcon}).addTo(map), lat: -33.8688, lng: 151.2093, dLat: 0.1, dLng: -0.1 }, // Sydney to Asia
+        { marker: L.marker([25.2048, 55.2708], {icon: planeIcon}).addTo(map), lat: 25.2048, lng: 55.2708, dLat: 0.05, dLng: 0.05 } // Dubai to Europe
+    ];
+
+    // Animate planes
+    setInterval(() => {
+        planes.forEach(p => {
+            p.lat += p.dLat;
+            p.lng += p.dLng;
+            
+            // basic bounds reset
+            if (p.lng > 180) p.lng = -180;
+            if (p.lng < -180) p.lng = 180;
+            if (p.lat > 90) p.lat = -90;
+            if (p.lat < -90) p.lat = 90;
+
+            p.marker.setLatLng([p.lat, p.lng]);
+        });
+    }, 100);
+
     // Initialize Chart.js
     const ctx = document.getElementById('trafficChart').getContext('2d');
     
