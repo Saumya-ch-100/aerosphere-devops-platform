@@ -1,0 +1,6 @@
+apiVersion: v2
+name: aerosphere-core
+description: A generic Helm chart for AeroSphere microservices
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
