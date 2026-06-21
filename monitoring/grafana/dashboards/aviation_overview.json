@@ -1,0 +1,16 @@
+{
+  "title": "Aviation Operations Overview",
+  "uid": "aviation-overview",
+  "panels": [
+    {
+      "title": "Active Flights",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "aerosphere_flights_active",
+          "legendFormat": "Flights"
+        }
+      ]
+    }
+  ]
+}

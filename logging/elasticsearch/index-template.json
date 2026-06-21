@@ -1,0 +1,14 @@
+{
+  "index_patterns": ["aerosphere-logs-*"],
+  "template": {
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "level": { "type": "keyword" },
+        "service": { "type": "keyword" },
+        "requestId": { "type": "keyword" },
+        "message": { "type": "text" }
+      }
+    }
+  }
+}

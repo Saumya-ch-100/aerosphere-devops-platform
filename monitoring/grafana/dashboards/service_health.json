@@ -1,0 +1,16 @@
+{
+  "title": "Service Health",
+  "uid": "service-health",
+  "panels": [
+    {
+      "title": "Service Uptime",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "up{namespace='aerosphere-prod'}",
+          "legendFormat": "{{service}}"
+        }
+      ]
+    }
+  ]
+}

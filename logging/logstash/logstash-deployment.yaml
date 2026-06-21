@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-config
+  namespace: logging
+data:
+  logstash.conf: |-
+    input {
+      beats {
+        port => 5044
+      }
+    }
+    filter {
+      # Parse the JSON log if the message looks like JSON (starts with { )
+      if [message] =~ /^\{.*/ {
+        json {
+          source => "message"
+          target => "app_log"
+        }
+        
+        # Promote the nested fields up to the top level for easier querying
+        if [app_log][level] {
+          mutate { replace => { "level" => "%{[app_log][level]}" } }
+        }
+        if [app_log][service] {
+          mutate { replace => { "service" => "%{[app_log][service]}" } }
+        }
+        if [app_log][req][id] {
+          mutate { add_field => { "requestId" => "%{[app_log][req][id]}" } }
+        }
+        if [app_log][msg] {
+          mutate { replace => { "message" => "%{[app_log][msg]}" } }
+        }
+      }
+    }
+    output {
+      elasticsearch {
+        hosts => ["http://elasticsearch-master:9200"]
+        index => "aerosphere-logs-%{+YYYY.MM.dd}"
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+  namespace: logging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+      - name: logstash
+        image: docker.elastic.co/logstash/logstash:8.10.2
+        ports:
+        - containerPort: 5044
+        volumeMounts:
+        - name: config-volume
+          mountPath: /usr/share/logstash/pipeline/logstash.conf
+          subPath: logstash.conf
+      volumes:
+      - name: config-volume
+        configMap:
+          name: logstash-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+  namespace: logging
+spec:
+  selector:
+    app: logstash
+  ports:
+  - port: 5044
+    targetPort: 5044

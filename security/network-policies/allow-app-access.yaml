@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-app-access
+  namespace: aerosphere-prod
+spec:
+  # This policy applies to all microservices (they use port 3000 internally as per values.yaml targetPort)
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    # Allow traffic from Traefik ingress controller (typically in kube-system in K3s)
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: traefik
+    # Allow intra-namespace traffic for Prometheus scraping
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: monitoring
+    ports:
+    - port: 3000
+      protocol: TCP
+    - port: 80
+      protocol: TCP

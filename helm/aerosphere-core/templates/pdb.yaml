@@ -2,12 +2,12 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "aerosphere-core.fullname" . }}
+  name: {{ .Values.nameOverride | default .Chart.Name }}
   labels:
-    {{- include "aerosphere-core.labels" . | nindent 4 }}
+    app: {{ .Values.nameOverride | default .Chart.Name }}
 spec:
   minAvailable: {{ .Values.pdb.minAvailable }}
   selector:
     matchLabels:
-      {{- include "aerosphere-core.selectorLabels" . | nindent 6 }}
+      app: {{ .Values.nameOverride | default .Chart.Name }}
 {{- end }}

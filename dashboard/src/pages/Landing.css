@@ -1,0 +1,140 @@
+.landing-container {
+  overflow-x: hidden;
+  background-color: var(--bg-darker);
+  color: var(--text-main);
+}
+
+/* Hero Section */
+.hero-section {
+  position: relative;
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0 5%;
+}
+
+.badge-modern {
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  padding: 0.25rem 1rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  letter-spacing: 0.5px;
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 400;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  max-width: 1000px;
+  letter-spacing: -0.5px;
+}
+
+.text-lime {
+  color: var(--accent-lime);
+  font-weight: 400;
+}
+
+.hero-subtitle {
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  color: #64748b;
+  max-width: 700px;
+  margin-bottom: 3.5rem;
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Feature Grid */
+.features-section {
+  padding: 6rem 5%;
+  background: var(--charcoal);
+}
+
+.section-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 400;
+  margin-bottom: 4rem;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  background: var(--bg-darker);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 2.5rem 2rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.feature-icon {
+  font-size: 1.75rem;
+  color: var(--accent-lime);
+  margin-bottom: 1.5rem;
+}
+
+.feature-card h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+  color: var(--text-main);
+}
+
+.feature-card p {
+  color: #64748b;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* Stats Section */
+.stats-section {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  padding: 4rem 5%;
+  background: var(--bg-darker);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-box {
+  text-align: center;
+  padding: 2rem;
+}
+
+.stat-box h2 {
+  font-size: 3rem;
+  font-weight: 300;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.stat-box p {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 400;
+}

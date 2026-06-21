@@ -1,0 +1,16 @@
+{
+  "title": "Kubernetes Cluster",
+  "uid": "k8s-cluster",
+  "panels": [
+    {
+      "title": "Node CPU Usage",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(node_cpu_seconds_total{mode!='idle'}[5m])) by (instance)",
+          "legendFormat": "{{instance}}"
+        }
+      ]
+    }
+  ]
+}

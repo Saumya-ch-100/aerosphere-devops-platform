@@ -1,0 +1,60 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: aerosphere-alerts
+  namespace: monitoring
+  labels:
+    release: prometheus # standard label for kube-prometheus-stack
+spec:
+  groups:
+    - name: aerosphere.rules
+      rules:
+        # PodDown alert
+        - alert: PodDown
+          expr: up == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod {{ $labels.kubernetes_pod_name }} is down"
+            description: "Pod has been down for more than 1 minute."
+
+        # HighCPU alert
+        - alert: HighCPU
+          expr: sum(rate(container_cpu_usage_seconds_total{namespace="aerosphere-prod"}[5m])) by (pod) > 0.8
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU usage on pod {{ $labels.pod }}"
+            description: "CPU usage is > 80% for 5 minutes."
+
+        # HighMemory alert
+        - alert: HighMemory
+          expr: sum(container_memory_usage_bytes{namespace="aerosphere-prod"}) by (pod) / sum(container_spec_memory_limit_bytes{namespace="aerosphere-prod"}) by (pod) > 0.85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High Memory usage on pod {{ $labels.pod }}"
+            description: "Memory usage is > 85% for 5 minutes."
+
+        # ServiceUnavailable alert
+        - alert: ServiceUnavailable
+          expr: sum by (service) (up{namespace="aerosphere-prod"}) == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "AeroSphere Service is unavailable"
+            description: "No endpoints found for the AeroSphere services."
+
+        # HighResponseTime alert
+        - alert: HighResponseTime
+          expr: http_request_duration_seconds_bucket{namespace="aerosphere-prod", le="0.5"} < 0.9
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High Response Time for {{ $labels.service }}"
+            description: "More than 10% of requests are taking longer than 0.5 seconds."

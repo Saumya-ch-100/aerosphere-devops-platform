@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-db-access
+  namespace: aerosphere-prod
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres-db
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: aerosphere-prod
+      podSelector:
+        matchLabels:
+          app: flight-ops
+    ports:
+    - port: 5432
+      protocol: TCP

@@ -1,0 +1,16 @@
+{
+  "title": "Disaster Recovery",
+  "uid": "disaster-recovery",
+  "panels": [
+    {
+      "title": "Pod Disruption Budget Status",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "kube_poddisruptionbudget_status_current_healthy",
+          "legendFormat": "{{poddisruptionbudget}}"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"type":"index-pattern","id":"aerosphere-logs","attributes":{"title":"aerosphere-logs-*","timeFieldName":"@timestamp"}}

@@ -1,0 +1,1 @@
+{"type":"search","id":"error-logs","attributes":{"title":"Recent Error Logs","query":{"query":"level:\"error\"","language":"kuery"}}}

@@ -10,7 +10,7 @@ This project implements a highly available DevOps ecosystem:
 
 - **Infrastructure Automation**: AWS Provisioned via Terraform
 - **Containerization**: Microservices in Docker
-- **Orchestration**: Kubernetes (EKS)
+- **Orchestration**: Kubernetes (K3s)
 - **CI/CD**: Jenkins Pipelines
 - **Observability**: Prometheus, Grafana, ELK Stack
 - **Security & Secrets**: HashiCorp Vault

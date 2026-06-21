@@ -1,0 +1,86 @@
+:root {
+  --bg-darker: #0E1410;
+  --accent-lime: #D4FF00;
+  --text-main: #F0F4F2;
+  --charcoal: #151D17;
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --text-muted: #8A968F;
+  --accent-red: #ef4444;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body {
+  background: var(--bg-darker);
+  color: var(--text-main);
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-weight: 300;
+  letter-spacing: 0.2px;
+}
+
+a {
+  text-decoration: none;
+}
+
+/* Utilities */
+.text-lime { color: var(--accent-lime); }
+.bg-charcoal { background-color: var(--charcoal); }
+.border-lime { border: 1px solid var(--panel-border); }
+.border-lime-thin { border: 1px solid var(--panel-border); }
+
+/* Buttons */
+.btn-primary {
+  background: var(--accent-lime);
+  color: #000;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-primary:hover {
+  background: transparent;
+  color: var(--accent-lime);
+  border: 1px solid var(--accent-lime);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-main);
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* Leaflet Map */
+.custom-plane-icon { background: transparent !important; border: none !important; }
+.leaflet-container { background: var(--charcoal) !important; font-family: 'Inter', sans-serif !important; border: 1px solid var(--panel-border); border-radius: 8px; }
+.leaflet-bar a { background-color: var(--charcoal) !important; color: var(--text-main) !important; border-color: var(--panel-border) !important; }

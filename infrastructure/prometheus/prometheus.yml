@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'aerosphere-services'
+    static_configs:
+      - targets: ['flight-ops:8001', 'telemetry:8002', 'maintenance:8003', 'weather-intel:8004', 'baggage-ops:8005', 'passenger-ops:8006']

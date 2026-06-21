@@ -1,45 +1,94 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "aerosphere-core.fullname" . }}
+  name: {{ .Values.nameOverride | default .Chart.Name }}
   labels:
-    {{- include "aerosphere-core.labels" . | nindent 4 }}
+    app: {{ .Values.nameOverride | default .Chart.Name }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.autoscaling.minReplicas }}
   {{- end }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
   selector:
     matchLabels:
-      {{- include "aerosphere-core.selectorLabels" . | nindent 6 }}
+      app: {{ .Values.nameOverride | default .Chart.Name }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
-        {{- include "aerosphere-core.selectorLabels" . | nindent 8 }}
+        app: {{ .Values.nameOverride | default .Chart.Name }}
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "aerosphere"
+        vault.hashicorp.com/agent-inject-secret-database-config: "secret/data/aerosphere/postgres"
     spec:
-      serviceAccountName: {{ include "aerosphere-core.serviceAccountName" . }}
+      serviceAccountName: {{ .Values.serviceAccount.name | default "default" }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
+      imagePullSecrets:
+        - name: ecr-registry-secret
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Values.nameOverride | default .Chart.Name }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
+          {{- if .Values.probes.liveness.enabled }}
           livenessProbe:
             httpGet:
-              path: /health
+              path: {{ .Values.probes.liveness.path }}
               port: http
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+          {{- end }}
+          {{- if .Values.probes.readiness.enabled }}
           readinessProbe:
             httpGet:
-              path: /health
+              path: {{ .Values.probes.readiness.path }}
               port: http
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-volume
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: NODE_ENV
+              value: "production"
+            # Postgres Database Config
+            - name: DB_HOST
+              value: "postgres-db"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_USER
+                  optional: true
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_PASSWORD
+                  optional: true
+            - name: DB_NAME
+              value: "aerosphere"
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}

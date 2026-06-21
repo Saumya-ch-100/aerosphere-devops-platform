@@ -29,7 +29,7 @@ resource "aws_subnet" "public" {
     Name                                           = "aerosphere-public-${var.environment}-${count.index + 1}"
     Environment                                    = var.environment
     "kubernetes.io/role/elb"                       = "1"
-    "kubernetes.io/cluster/aerosphere-eks-${var.environment}" = "shared"
+    "kubernetes.io/cluster/aerosphere-k3s-${var.environment}" = "shared"
   }
 }
 
@@ -43,7 +43,7 @@ resource "aws_subnet" "private" {
     Name                                           = "aerosphere-private-${var.environment}-${count.index + 1}"
     Environment                                    = var.environment
     "kubernetes.io/role/internal-elb"              = "1"
-    "kubernetes.io/cluster/aerosphere-eks-${var.environment}" = "shared"
+    "kubernetes.io/cluster/aerosphere-k3s-${var.environment}" = "shared"
   }
 }
 

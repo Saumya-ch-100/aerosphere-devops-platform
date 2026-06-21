@@ -1,7 +1,7 @@
 variable "aws_region" {
   description = "AWS region"
   type        = string
-  default     = "us-east-1"
+  default     = "ap-south-1"
 }
 
 variable "environment" {
@@ -31,23 +31,30 @@ variable "private_subnet_cidrs" {
 variable "availability_zones" {
   description = "Availability Zones"
   type        = list(string)
-  default     = ["us-east-1a", "us-east-1b"]
+  default     = ["ap-south-1a", "ap-south-1b"]
 }
 
-variable "node_instance_type" {
-  description = "EKS node instance type"
+variable "ec2_instance_type" {
+  description = "EC2 instance type"
   type        = string
-  default     = "t3.medium"
+  default     = "t3.xlarge"
 }
 
-variable "min_capacity" {
-  description = "Minimum node capacity"
+variable "min_size" {
+  description = "Minimum EC2 instances"
   type        = number
   default     = 2
 }
 
-variable "max_capacity" {
-  description = "Maximum node capacity"
+variable "max_size" {
+  description = "Maximum EC2 instances"
   type        = number
-  default     = 5
+  default     = 3
+}
+
+variable "k3s_token" {
+  description = "Token for K3s cluster joining"
+  type        = string
+  default     = "SuperSecretK3sToken123!"
+  sensitive   = true
 }
