@@ -4,6 +4,13 @@ AeroSphere Command manages a worldwide aviation operations platform supporting c
 
 This repository contains the cloud-native modernization initiative focused on infrastructure automation, continuous deployment, observability, and resilience.
 
+## 🚀 Live Demo
+
+You can view the live AWS deployment of the AeroSphere Platform here:
+**[http://aerosphere-alb-dev-1534496399.ap-south-1.elb.amazonaws.com/](http://aerosphere-alb-dev-1534496399.ap-south-1.elb.amazonaws.com/)**
+
+> **Note:** The platform includes paths for `/grafana/` (Observability), `/prometheus/` (Metrics), and the main React Dashboard.
+
 ## Architecture
 
 This project implements a highly available DevOps ecosystem:
