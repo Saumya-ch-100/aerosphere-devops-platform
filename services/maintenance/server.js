@@ -27,7 +27,7 @@ app.get('/metrics', async (req, res) => {
   res.end(await client.register.metrics());
 });
 
-const port = 8003;
+const port = process.env.PORT || 8003;
 
 app.get('/health', (req, res) => {
   res.json({ status: 'up' });

@@ -65,6 +65,10 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp-volume
+            - mountPath: /var/cache/nginx
+              name: nginx-cache-volume
+            - mountPath: /var/run
+              name: var-run-volume
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
@@ -91,4 +95,8 @@ spec:
               value: "aerosphere"
       volumes:
         - name: tmp-volume
+          emptyDir: {}
+        - name: nginx-cache-volume
+          emptyDir: {}
+        - name: var-run-volume
           emptyDir: {}

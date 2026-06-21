@@ -33,6 +33,9 @@ cloud-up: ## Deploy the full AWS EC2 Environment
 	kubectl create namespace vault || true; \
 	kubectl create namespace jenkins || true; \
 	kubectl create namespace aerosphere-prod || true; \
+	kubectl apply -f security/rbac/aerosphere-rbac.yaml; \
+	kubectl apply -f security/network-policies/; \
+	kubectl apply -f kubernetes/postgres-secret.yaml; \
 	kubectl apply -f kubernetes/postgres-db.yaml; \
 	helm upgrade --install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring --wait; \
 	helm upgrade --install vault hashicorp/vault -f helm/vault-values.yaml --namespace vault --wait || true; \

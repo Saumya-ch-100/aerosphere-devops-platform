@@ -6,12 +6,6 @@ server:
     # In dev mode, Vault automatically enables KV v2 at "secret/"
   dataStorage:
     enabled: false
-  
-injector:
-  enabled: true
-  
-# Automated Kubernetes Auth configuration for Vault
-server:
   postStart:
     - "/bin/sh"
     - "-c"
@@ -19,7 +13,7 @@ server:
       sleep 5
       vault auth enable kubernetes
       vault write auth/kubernetes/config \
-        kubernetes_host="https://\$KUBERNETES_SERVICE_HOST:\$KUBERNETES_SERVICE_PORT"
+        kubernetes_host="https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT"
       
       # Write policy
       vault policy write aerosphere - <<EOF
@@ -39,3 +33,6 @@ server:
       vault kv put secret/aerosphere/postgres \
         POSTGRES_USER=aerosphere_admin \
         POSTGRES_PASSWORD=secure_password_from_vault
+
+injector:
+  enabled: true

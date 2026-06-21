@@ -49,12 +49,17 @@ pipeline {
                     for (int i = 0; i < services.size(); i++) {
                         def svc = services[i]
                         echo "Deploying ${svc}..."
-                        // Since Jenkins runs inside K8s, it uses the default service account to deploy
+                        def helmArgs = ""
+                        if (svc == 'dashboard') {
+                            helmArgs = "--set service.targetPort=80 --set probes.liveness.path=/ --set probes.readiness.path=/"
+                        }
+                        
                         sh """
                         helm upgrade --install ${svc} ./helm/aerosphere-core \\
                             --namespace aerosphere-prod \\
                             --set image.repository=${env.ECR_REGISTRY}/aerosphere-${svc} \\
                             --set nameOverride=${svc} \\
+                            ${helmArgs} \\
                             --wait
                         """
                     }
