@@ -21,6 +21,10 @@ spec:
     - namespaceSelector:
         matchLabels:
           kubernetes.io/metadata.name: monitoring
+    # Allow intra-namespace traffic between microservices (e.g. dashboard to backend)
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: aerosphere-prod
     ports:
     - port: 3000
       protocol: TCP

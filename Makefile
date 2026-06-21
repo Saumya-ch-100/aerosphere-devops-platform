@@ -59,6 +59,7 @@ cloud-up: ## Deploy the full AWS EC2 Environment
 			--namespace aerosphere-prod \
 			--set image.repository=$$ACCOUNT_ID.dkr.ecr.$(AWS_REGION).amazonaws.com/aerosphere-$$svc \
 			--set nameOverride=$$svc \
+			--set image.tag=latest \
 			--wait; \
 	done
 	@echo ">> Applying Ingress Routing..."

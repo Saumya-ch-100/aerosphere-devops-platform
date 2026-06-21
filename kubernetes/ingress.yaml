@@ -14,7 +14,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: dashboard-service
+                name: dashboard
                 port:
                   number: 80
           - path: /grafana
