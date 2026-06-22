@@ -40,7 +40,7 @@ const pool = new Pool({
   database: 'postgres'
 });
 
-// Create table if not exists
+// Create table if not exists and alter to add new columns
 pool.query(`
   CREATE TABLE IF NOT EXISTS flights (
     id VARCHAR(10) PRIMARY KEY,
@@ -48,8 +48,11 @@ pool.query(`
     origin VARCHAR(3),
     destination VARCHAR(3),
     status VARCHAR(20)
-  )
-`).catch(err => console.error('Error creating table:', err));
+  );
+  ALTER TABLE flights ADD COLUMN IF NOT EXISTS aircraft_type VARCHAR(50);
+  ALTER TABLE flights ADD COLUMN IF NOT EXISTS departure_time VARCHAR(50);
+  ALTER TABLE flights ADD COLUMN IF NOT EXISTS estimated_arrival VARCHAR(50);
+`).catch(err => console.error('Error initializing table:', err));
 
 app.get('/health', (req, res) => {
   res.json({ status: 'up' });
@@ -65,13 +68,38 @@ app.get('/flights', async (req, res) => {
 });
 
 app.post('/flights', async (req, res) => {
-  const { id, airline, origin, destination, status } = req.body;
+  const { id, airline, origin, destination, status, aircraft_type, departure_time, estimated_arrival } = req.body;
   try {
     await pool.query(
-      'INSERT INTO flights (id, airline, origin, destination, status) VALUES ($1, $2, $3, $4, $5)',
-      [id, airline, origin, destination, status]
+      'INSERT INTO flights (id, airline, origin, destination, status, aircraft_type, departure_time, estimated_arrival) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+      [id, airline, origin, destination, status || 'Scheduled', aircraft_type || 'Unknown', departure_time || 'TBD', estimated_arrival || 'TBD']
     );
     res.json({ message: "Flight added successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/flights/:id/status', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  try {
+    await pool.query('UPDATE flights SET status = $1 WHERE id = $2', [status, id]);
+    res.json({ message: "Flight status updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/flights/search', async (req, res) => {
+  const { query } = req.query;
+  try {
+    const searchParam = `%${query}%`;
+    const result = await pool.query(
+      'SELECT * FROM flights WHERE id ILIKE $1 OR airline ILIKE $1 OR origin ILIKE $1 OR destination ILIKE $1',
+      [searchParam]
+    );
+    res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

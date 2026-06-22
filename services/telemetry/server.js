@@ -29,18 +29,26 @@ app.get('/metrics', async (req, res) => {
 
 const port = process.env.PORT || 8002;
 
+let isSimulatingOutage = false;
+
 app.get('/health', (req, res) => {
+  if (isSimulatingOutage) {
+    // Return 503 so Kubernetes liveness probe fails
+    return res.status(503).json({ status: 'down', reason: 'simulated_outage' });
+  }
   res.json({ status: 'up' });
 });
 
-
-
 app.post('/admin/shutoff', (req, res) => {
-  res.json({ message: "Shutting down telemetry service gracefully..." });
-  console.log("Graceful shutoff initiated via Admin API");
-  setTimeout(() => {
-    process.exit(0);
-  }, 1000);
+  isSimulatingOutage = true;
+  console.log("Simulated outage initiated via Admin API. Health checks will now fail.");
+  res.json({ message: "Outage simulated. Pod will eventually be killed by K8s Liveness Probe." });
+});
+
+app.post('/admin/turnon', (req, res) => {
+  isSimulatingOutage = false;
+  console.log("Service recovered via Admin API.");
+  res.json({ message: "Service recovered successfully." });
 });
 
 app.listen(port, '0.0.0.0', () => {

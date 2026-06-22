@@ -29,7 +29,9 @@ function Dashboard() {
     'weather-intel': false, 'baggage-ops': false, 'passenger-ops': false
   });
   const [flights, setFlights] = useState([]);
-  const [newFlight, setNewFlight] = useState({ id: '', airline: '', origin: '', destination: '', status: 'In Flight' });
+  const [newFlight, setNewFlight] = useState({ id: '', airline: '', origin: '', destination: '', status: 'Scheduled', aircraft_type: '', departure_time: '', estimated_arrival: '' });
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchQueryRef = React.useRef('');
   const [apiRequests, setApiRequests] = useState([120, 190, 300, 450, 380, 250, 200]);
   const [totalReqs, setTotalReqs] = useState(1425900);
   const [vaultLogs, setVaultLogs] = useState([]);
@@ -52,7 +54,9 @@ function Dashboard() {
 
     const fetchFlights = async () => {
       try {
-        const res = await fetch('/api/flight-ops/flights', { cache: 'no-store' });
+        const query = searchQueryRef.current;
+        const url = query ? `/api/flight-ops/flights/search?query=${query}` : '/api/flight-ops/flights';
+        const res = await fetch(url, { cache: 'no-store' });
         if (res.ok) {
           setFlights(await res.json());
         }
@@ -126,6 +130,11 @@ function Dashboard() {
     return () => clearInterval(logInterval);
   }, []);
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    searchQueryRef.current = e.target.value;
+  };
+
   const handleAddFlight = async (e) => {
     e.preventDefault();
     try {
@@ -134,9 +143,23 @@ function Dashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newFlight)
       });
-      setNewFlight({ id: '', airline: '', origin: '', destination: '', status: 'In Flight' });
+      setNewFlight({ id: '', airline: '', origin: '', destination: '', status: 'Scheduled', aircraft_type: '', departure_time: '', estimated_arrival: '' });
       // The polling will auto-refresh it
     } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleUpdateStatus = async (id, status) => {
+    try {
+      await fetch(`/api/flight-ops/flights/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      // Optimistic update
+      setFlights(flights.map(f => f.id === id ? { ...f, status } : f));
+    } catch(e) {
       console.error(e);
     }
   };
@@ -161,10 +184,19 @@ function Dashboard() {
   };
 
   const handleShutoff = async () => {
-    if (!window.confirm("WARNING: Are you sure you want to gracefully shut down the telemetry container? It will require a manual restart.")) return;
+    if (!window.confirm("WARNING: Are you sure you want to gracefully shut down the telemetry container? It will start failing health checks.")) return;
     try {
       await fetch('/api/telemetry/admin/shutoff', { method: 'POST' });
-      alert("Telemetry shutoff signal sent. The service will terminate shortly.");
+      alert("Telemetry shutoff signal sent. The service will return 503s and eventually be killed by K8s.");
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleTurnOn = async () => {
+    try {
+      await fetch('/api/telemetry/admin/turnon', { method: 'POST' });
+      alert("Recovery signal sent. Telemetry will become healthy instantly.");
     } catch (e) {
       console.error(e);
     }
@@ -299,28 +331,35 @@ function Dashboard() {
 
         {activeTab === 'flightops' && (
           <div>
-            <h1 style={{ fontSize: '2rem', fontWeight: 300, marginBottom: '2rem', letterSpacing: '-0.5px' }}>Flight Operations</h1>
+            <h1 style={{ fontSize: '2rem', fontWeight: 300, marginBottom: '2rem', letterSpacing: '-0.5px' }}>Flight Operations Control Center</h1>
             
             <div className="bg-charcoal border-lime-thin" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '8px' }}>
-              <h3 style={{ marginBottom: '1rem', fontWeight: 400 }}>Add New Flight</h3>
-              <form onSubmit={handleAddFlight} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <h3 style={{ marginBottom: '1rem', fontWeight: 400 }}>Schedule New Flight</h3>
+              <form onSubmit={handleAddFlight} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <input type="text" placeholder="Flight ID (e.g. BA293)" required value={newFlight.id} onChange={e => setNewFlight({...newFlight, id: e.target.value})} style={inputStyle} />
                 <input type="text" placeholder="Airline" required value={newFlight.airline} onChange={e => setNewFlight({...newFlight, airline: e.target.value})} style={inputStyle} />
+                <input type="text" placeholder="Aircraft (e.g. B777)" value={newFlight.aircraft_type} onChange={e => setNewFlight({...newFlight, aircraft_type: e.target.value})} style={inputStyle} />
                 <input type="text" placeholder="Origin (e.g. LHR)" required value={newFlight.origin} onChange={e => setNewFlight({...newFlight, origin: e.target.value})} style={inputStyle} />
                 <input type="text" placeholder="Destination (e.g. JFK)" required value={newFlight.destination} onChange={e => setNewFlight({...newFlight, destination: e.target.value})} style={inputStyle} />
+                <input type="time" required value={newFlight.departure_time} onChange={e => setNewFlight({...newFlight, departure_time: e.target.value})} style={inputStyle} />
+                <input type="time" required value={newFlight.estimated_arrival} onChange={e => setNewFlight({...newFlight, estimated_arrival: e.target.value})} style={inputStyle} />
                 <button type="submit" className="btn-primary" style={{ padding: '0.5rem 1.25rem', borderRadius: '4px' }}>Add Flight</button>
               </form>
             </div>
 
             <div className="bg-charcoal border-lime-thin" style={{ padding: '1.5rem', borderRadius: '8px' }}>
-              <h3 style={{ marginBottom: '1rem', fontWeight: 400 }}>Active Flights Database</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h3 style={{ fontWeight: 400, margin: 0 }}>Active Flights Database</h3>
+                <input type="text" placeholder="Search by ID, Airline, Airport..." value={searchQuery} onChange={handleSearchChange} style={{ ...inputStyle, width: '300px' }} />
+              </div>
               <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                     <th style={{ padding: '1rem 0.5rem', color: '#64748b', fontWeight: 500 }}>ID</th>
                     <th style={{ padding: '1rem 0.5rem', color: '#64748b', fontWeight: 500 }}>Airline</th>
-                    <th style={{ padding: '1rem 0.5rem', color: '#64748b', fontWeight: 500 }}>Origin</th>
-                    <th style={{ padding: '1rem 0.5rem', color: '#64748b', fontWeight: 500 }}>Dest</th>
+                    <th style={{ padding: '1rem 0.5rem', color: '#64748b', fontWeight: 500 }}>Aircraft</th>
+                    <th style={{ padding: '1rem 0.5rem', color: '#64748b', fontWeight: 500 }}>Route</th>
+                    <th style={{ padding: '1rem 0.5rem', color: '#64748b', fontWeight: 500 }}>Schedule</th>
                     <th style={{ padding: '1rem 0.5rem', color: '#64748b', fontWeight: 500 }}>Status</th>
                     <th style={{ padding: '1rem 0.5rem', color: '#64748b', fontWeight: 500, textAlign: 'right' }}>Actions</th>
                   </tr>
@@ -328,17 +367,36 @@ function Dashboard() {
                 <tbody>
                   {flights.map(f => (
                     <tr key={f.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
-                      <td style={{ padding: '1rem 0.5rem', color: 'var(--text-main)' }}>{f.id}</td>
+                      <td style={{ padding: '1rem 0.5rem', color: 'var(--text-main)', fontWeight: 500 }}>{f.id}</td>
                       <td style={{ padding: '1rem 0.5rem', color: '#94a3b8' }}>{f.airline}</td>
-                      <td style={{ padding: '1rem 0.5rem', color: '#94a3b8' }}>{f.origin}</td>
-                      <td style={{ padding: '1rem 0.5rem', color: '#94a3b8' }}>{f.destination}</td>
-                      <td style={{ padding: '1rem 0.5rem', color: f.status === 'In Flight' ? 'var(--accent-lime)' : '#ef4444' }}>{f.status}</td>
+                      <td style={{ padding: '1rem 0.5rem', color: '#94a3b8' }}>{f.aircraft_type || 'Unknown'}</td>
+                      <td style={{ padding: '1rem 0.5rem', color: '#f8fafc' }}>{f.origin} <i className="fa-solid fa-arrow-right" style={{ color: '#64748b', fontSize: '0.75rem', margin: '0 4px' }}></i> {f.destination}</td>
+                      <td style={{ padding: '1rem 0.5rem', color: '#94a3b8' }}>{f.departure_time || 'TBD'} - {f.estimated_arrival || 'TBD'}</td>
+                      <td style={{ padding: '1rem 0.5rem' }}>
+                        <select 
+                          value={f.status} 
+                          onChange={(e) => handleUpdateStatus(f.id, e.target.value)}
+                          style={{
+                            background: f.status === 'Delayed' ? 'rgba(239, 68, 68, 0.1)' : (f.status === 'In Air' ? 'rgba(57, 255, 20, 0.1)' : 'rgba(255, 255, 255, 0.05)'),
+                            color: f.status === 'Delayed' ? '#ef4444' : (f.status === 'In Air' ? 'var(--accent-lime)' : '#e2e8f0'),
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            padding: '4px 8px', borderRadius: '4px', outline: 'none', cursor: 'pointer'
+                          }}
+                        >
+                          <option value="Scheduled">Scheduled</option>
+                          <option value="Boarding">Boarding</option>
+                          <option value="In Air">In Air</option>
+                          <option value="Delayed">Delayed</option>
+                          <option value="Landed">Landed</option>
+                        </select>
+                      </td>
                       <td style={{ padding: '1rem 0.5rem', textAlign: 'right' }}>
-                        <button onClick={() => handleDeleteFlight(f.id)} style={{ background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', padding: '0.25rem 0.75rem', cursor: 'pointer', borderRadius: '4px', fontSize: '0.8rem' }}>Delete</button>
+                        <button onClick={() => handleUpdateStatus(f.id, 'Delayed')} style={{ background: 'transparent', border: '1px solid rgba(234, 179, 8, 0.5)', color: '#eab308', padding: '0.25rem 0.5rem', cursor: 'pointer', borderRadius: '4px', fontSize: '0.75rem', marginRight: '0.5rem' }}>Delay</button>
+                        <button onClick={() => handleDeleteFlight(f.id)} style={{ background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', padding: '0.25rem 0.5rem', cursor: 'pointer', borderRadius: '4px', fontSize: '0.75rem' }}>Delete</button>
                       </td>
                     </tr>
                   ))}
-                  {flights.length === 0 && <tr><td colSpan="6" style={{ padding: '2rem', color: '#ef4444', textAlign: 'center' }}>Database connection offline.</td></tr>}
+                  {flights.length === 0 && <tr><td colSpan="7" style={{ padding: '2rem', color: '#ef4444', textAlign: 'center' }}>No active flights found or database connection offline.</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -377,15 +435,20 @@ function Dashboard() {
 
               <div className="bg-charcoal border-lime-thin" style={{ padding: '2rem', borderRadius: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                  <i className="fa-solid fa-power-off" style={{ fontSize: '1.5rem', color: 'var(--accent-lime)' }}></i>
-                  <h3 style={{ fontWeight: 400 }}>Simulate Telemetry Shutoff</h3>
+                  <i className="fa-solid fa-power-off" style={{ fontSize: '1.5rem', color: '#eab308' }}></i>
+                  <h3 style={{ fontWeight: 400 }}>Disaster Recovery Simulation (Telemetry)</h3>
                 </div>
                 <p style={{ color: '#64748b', marginBottom: '2rem', fontSize: '0.9rem' }}>
-                  Trigger a graceful shutdown of the Telemetry microservice pod to simulate a disaster recovery scenario and test health check resilience.
+                  Trigger a 503 Service Unavailable state in the Telemetry microservice. Watch Kubernetes automatically self-heal by killing the unresponsive pod and replacing it, or click 'Recover' to heal it instantly via the API.
                 </p>
-                <button onClick={handleShutoff} style={{ background: 'rgba(57, 255, 20, 0.1)', color: 'var(--accent-lime)', border: '1px solid var(--accent-lime)', padding: '0.75rem 1.5rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 500 }}>
-                  Initiate Shutoff
-                </button>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <button onClick={handleShutoff} style={{ background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', border: '1px solid rgba(234, 179, 8, 0.5)', padding: '0.75rem 1.5rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 500 }}>
+                    Simulate Outage
+                  </button>
+                  <button onClick={handleTurnOn} style={{ background: 'rgba(57, 255, 20, 0.1)', color: 'var(--accent-lime)', border: '1px solid var(--accent-lime)', padding: '0.75rem 1.5rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 500 }}>
+                    Recover Service
+                  </button>
+                </div>
               </div>
             </div>
           </div>
